@@ -16,6 +16,17 @@ resource "aws_apigatewayv2_integration" "create_event" {
   payload_format_version = "2.0"
 }
 
+resource "aws_apigatewayv2_integration" "list_events" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  integration_type = "AWS_PROXY"
+
+  integration_uri = var.list_events_lambda_invoke_arn
+
+  payload_format_version = "2.0"
+}
+
 resource "aws_apigatewayv2_route" "create_event" {
 
   api_id = aws_apigatewayv2_api.this.id
@@ -23,6 +34,15 @@ resource "aws_apigatewayv2_route" "create_event" {
   route_key = "POST /events"
 
   target = "integrations/${aws_apigatewayv2_integration.create_event.id}"
+}
+
+resource "aws_apigatewayv2_route" "list_events" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  route_key = "GET /events"
+
+  target = "integrations/${aws_apigatewayv2_integration.list_events.id}"
 }
 
 resource "aws_apigatewayv2_stage" "prod" {
@@ -41,6 +61,52 @@ resource "aws_lambda_permission" "allow_api_gateway" {
   action = "lambda:InvokeFunction"
 
   function_name = var.create_event_lambda_name
+
+  principal = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_list_events" {
+
+  statement_id = "AllowListEventsExecution"
+
+  action = "lambda:InvokeFunction"
+
+  function_name = var.list_events_lambda_name
+
+  principal = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
+}
+
+resource "aws_apigatewayv2_integration" "get_event" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  integration_type = "AWS_PROXY"
+
+  integration_uri = var.get_event_lambda_invoke_arn
+
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "get_event" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  route_key = "GET /events/{eventId}"
+
+  target = "integrations/${aws_apigatewayv2_integration.get_event.id}"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_get_event" {
+
+  statement_id = "AllowGetEventExecution"
+
+  action = "lambda:InvokeFunction"
+
+  function_name = var.get_event_lambda_name
 
   principal = "apigateway.amazonaws.com"
 

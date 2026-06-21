@@ -74,6 +74,10 @@ module "api_gateway" {
 
   register_event_lambda_name = module.register_event_lambda.lambda_name
 
+  get_my_registrations_lambda_invoke_arn = module.get_my_registrations_lambda.invoke_arn
+
+  get_my_registrations_lambda_name = module.get_my_registrations_lambda.lambda_name
+
 }
 
 data "archive_file" "list_events_zip" {
@@ -194,6 +198,37 @@ module "register_event_lambda" {
   environment_variables = {
 
     EVENTS_TABLE = module.dynamodb.events_table_name
+
+    REGISTRATIONS_TABLE = module.dynamodb.registrations_table_name
+  }
+}
+
+data "archive_file" "get_my_registrations_zip" {
+
+  type = "zip"
+
+  source_dir = "../../../lambda/get-my-registrations"
+
+  output_path = "../../../build/get-my-registrations.zip"
+}
+
+module "get_my_registrations_lambda" {
+
+  source = "../../modules/lambda"
+
+  function_name = "get-my-registrations"
+
+  runtime = "python3.12"
+
+  handler = "lambda_function.lambda_handler"
+
+  role_arn = module.iam.event_lambda_role_arn
+
+  filename = data.archive_file.get_my_registrations_zip.output_path
+
+  source_code_hash = data.archive_file.get_my_registrations_zip.output_base64sha256
+
+  environment_variables = {
 
     REGISTRATIONS_TABLE = module.dynamodb.registrations_table_name
   }

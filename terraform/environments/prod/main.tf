@@ -87,6 +87,10 @@ module "api_gateway" {
 
   get_ticket_lambda_name = module.get_ticket_lambda.lambda_name
 
+  validate_ticket_lambda_invoke_arn = module.validate_ticket_lambda.invoke_arn
+
+  validate_ticket_lambda_name = module.validate_ticket_lambda.lambda_name
+
 }
 
 data "archive_file" "list_events_zip" {
@@ -336,6 +340,36 @@ module "get_ticket_lambda" {
   filename = data.archive_file.get_ticket_zip.output_path
 
   source_code_hash = data.archive_file.get_ticket_zip.output_base64sha256
+
+  environment_variables = {
+    TICKETS_TABLE = module.dynamodb.tickets_table_name
+  }
+}
+
+data "archive_file" "validate_ticket_zip" {
+
+  type = "zip"
+
+  source_dir = "../../../lambda/validate-ticket"
+
+  output_path = "../../../build/validate-ticket.zip"
+}
+
+module "validate_ticket_lambda" {
+
+  source = "../../modules/lambda"
+
+  function_name = "validate-ticket"
+
+  runtime = "python3.12"
+
+  handler = "lambda_function.lambda_handler"
+
+  role_arn = module.iam.event_lambda_role_arn
+
+  filename = data.archive_file.validate_ticket_zip.output_path
+
+  source_code_hash = data.archive_file.validate_ticket_zip.output_base64sha256
 
   environment_variables = {
     TICKETS_TABLE = module.dynamodb.tickets_table_name

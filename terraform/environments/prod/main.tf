@@ -13,8 +13,9 @@ module "dynamodb" {
 module "iam" {
   source = "../../modules/iam"
 
-  project_name     = "event-ticketing-v3"
-  events_table_arn = module.dynamodb.events_table_arn
+  project_name            = "event-ticketing-v3"
+  events_table_arn        = module.dynamodb.events_table_arn
+  registrations_table_arn = module.dynamodb.registrations_table_arn
 }
 
 data "archive_file" "create_event_zip" {
@@ -68,6 +69,10 @@ module "api_gateway" {
   get_my_events_lambda_invoke_arn = module.get_my_events_lambda.invoke_arn
 
   get_my_events_lambda_name = module.get_my_events_lambda.lambda_name
+
+  register_event_lambda_invoke_arn = module.register_event_lambda.invoke_arn
+
+  register_event_lambda_name = module.register_event_lambda.lambda_name
 
 }
 
@@ -160,3 +165,37 @@ module "get_my_events_lambda" {
     EVENTS_TABLE = module.dynamodb.events_table_name
   }
 }
+
+data "archive_file" "register_event_zip" {
+
+  type = "zip"
+
+  source_dir = "../../../lambda/register-event"
+
+  output_path = "../../../build/register-event.zip"
+}
+
+module "register_event_lambda" {
+
+  source = "../../modules/lambda"
+
+  function_name = "register-event"
+
+  runtime = "python3.12"
+
+  handler = "lambda_function.lambda_handler"
+
+  role_arn = module.iam.event_lambda_role_arn
+
+  filename = data.archive_file.register_event_zip.output_path
+
+  source_code_hash = data.archive_file.register_event_zip.output_base64sha256
+
+  environment_variables = {
+
+    EVENTS_TABLE = module.dynamodb.events_table_name
+
+    REGISTRATIONS_TABLE = module.dynamodb.registrations_table_name
+  }
+}
+

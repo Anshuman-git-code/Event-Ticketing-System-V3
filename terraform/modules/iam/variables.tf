@@ -5,3 +5,7 @@ variable "project_name" {
 variable "events_table_arn" {
   type = string
 }
+
+variable "registrations_table_arn" {
+  type = string
+}

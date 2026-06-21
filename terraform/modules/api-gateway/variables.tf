@@ -33,3 +33,11 @@ variable "get_my_events_lambda_invoke_arn" {
 variable "get_my_events_lambda_name" {
   type = string
 }
+
+variable "register_event_lambda_invoke_arn" {
+  type = string
+}
+
+variable "register_event_lambda_name" {
+  type = string
+}

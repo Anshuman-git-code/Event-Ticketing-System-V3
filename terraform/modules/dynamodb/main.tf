@@ -49,3 +49,38 @@ resource "aws_dynamodb_table" "events" {
     projection_type = "ALL"
   }
 }
+
+resource "aws_dynamodb_table" "registrations" {
+
+  name         = "${var.project_name}-registrations"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "registrationId"
+
+  attribute {
+    name = "registrationId"
+    type = "S"
+  }
+
+  attribute {
+    name = "eventId"
+    type = "S"
+  }
+
+  attribute {
+    name = "attendeeId"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "EventRegistrations"
+    hash_key        = "eventId"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "AttendeeRegistrations"
+    hash_key        = "attendeeId"
+    projection_type = "ALL"
+  }
+}

@@ -40,8 +40,12 @@ resource "aws_iam_policy" "event_lambda_policy" {
         ]
 
         Resource = [
+
           var.events_table_arn,
-          "${var.events_table_arn}/index/*"
+          "${var.events_table_arn}/index/*",
+
+          var.registrations_table_arn,
+          "${var.registrations_table_arn}/index/*"
         ]
       },
 
@@ -66,3 +70,4 @@ resource "aws_iam_role_policy_attachment" "event_lambda_attachment" {
   role       = aws_iam_role.event_lambda_role.name
   policy_arn = aws_iam_policy.event_lambda_policy.arn
 }
+

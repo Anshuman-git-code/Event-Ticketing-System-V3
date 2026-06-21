@@ -2,6 +2,8 @@ import json
 import boto3
 import os
 import uuid
+import qrcode
+import qrcode.image.svg
 
 from datetime import datetime
 
@@ -23,6 +25,32 @@ def lambda_handler(event, context):
         event_id = detail["eventId"]
         attendee_id = detail["attendeeId"]
 
+        qr_payload = {
+            "ticketId": ticket_id,
+            "registrationId": registration_id,
+            "eventId": event_id,
+            "attendeeId": attendee_id,
+        }
+
+        factory = qrcode.image.svg.SvgImage
+
+        img = qrcode.make(json.dumps(qr_payload), image_factory=factory)
+
+        file_path = f"/tmp/{ticket_id}.svg"
+
+        with open(file_path, "wb") as f:
+            img.save(f)
+
+        object_key = f"tickets/{ticket_id}.svg"
+
+        with open(file_path, "rb") as f:
+            s3.put_object(
+                Bucket=bucket_name,
+                Key=object_key,
+                Body=f,
+                ContentType="image/svg+xml",
+            )
+
         ticket = {
             "ticketId": ticket_id,
             "registrationId": registration_id,
@@ -30,25 +58,12 @@ def lambda_handler(event, context):
             "attendeeId": attendee_id,
             "ticketStatus": "VALID",
             "issuedAt": datetime.utcnow().isoformat(),
+            "ticketFileUrl": f"s3://{bucket_name}/{object_key}",
         }
-
-        # Create ticket artifact
-        ticket_file = json.dumps(ticket, indent=2)
-
-        object_key = f"tickets/{ticket_id}.json"
-
-        s3.put_object(
-            Bucket=bucket_name,
-            Key=object_key,
-            Body=ticket_file,
-            ContentType="application/json",
-        )
-
-        ticket["ticketFileUrl"] = f"s3://{bucket_name}/{object_key}"
 
         tickets_table.put_item(Item=ticket)
 
-        print(f"Ticket created and uploaded: {ticket_id}")
+        print(f"SVG QR ticket generated: {ticket_id}")
 
         return {"statusCode": 200, "body": json.dumps(ticket)}
 

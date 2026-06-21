@@ -259,7 +259,7 @@ data "archive_file" "generate_ticket_zip" {
 
   type = "zip"
 
-  source_dir = "../../../lambda/generate-ticket"
+  source_dir = "../../../build/generate-ticket-package"
 
   output_path = "../../../build/generate-ticket.zip"
 }

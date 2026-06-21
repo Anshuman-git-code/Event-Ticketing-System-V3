@@ -48,6 +48,17 @@ resource "aws_iam_policy" "event_lambda_policy" {
       },
       {
         Effect = "Allow"
+
+          Action = [
+            "s3:PutObject"
+          ]
+
+        Resource = [
+          "${var.tickets_bucket_arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",

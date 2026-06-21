@@ -13,3 +13,7 @@ variable "registrations_table_arn" {
 variable "tickets_table_arn" {
   type = string
 }
+
+variable "tickets_bucket_arn" {
+  type = string
+}

@@ -11,12 +11,16 @@ module "dynamodb" {
 }
 
 module "iam" {
+
   source = "../../modules/iam"
 
-  project_name            = "event-ticketing-v3"
+  project_name = "event-ticketing-v3"
+
   events_table_arn        = module.dynamodb.events_table_arn
   registrations_table_arn = module.dynamodb.registrations_table_arn
   tickets_table_arn       = module.dynamodb.tickets_table_arn
+
+  tickets_bucket_arn = module.s3.bucket_arn
 }
 
 data "archive_file" "create_event_zip" {
@@ -277,7 +281,8 @@ module "generate_ticket_lambda" {
   source_code_hash = data.archive_file.generate_ticket_zip.output_base64sha256
 
   environment_variables = {
-    TICKETS_TABLE = module.dynamodb.tickets_table_name
+    TICKETS_TABLE  = module.dynamodb.tickets_table_name
+    TICKETS_BUCKET = module.s3.bucket_name
   }
 }
 
@@ -378,4 +383,11 @@ module "validate_ticket_lambda" {
   environment_variables = {
     TICKETS_TABLE = module.dynamodb.tickets_table_name
   }
+}
+
+module "s3" {
+
+  source = "../../modules/s3"
+
+  project_name = "event-ticketing-v3"
 }

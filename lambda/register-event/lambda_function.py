@@ -6,57 +6,45 @@ import uuid
 from datetime import datetime
 from boto3.dynamodb.conditions import Key
 
+events_client = boto3.client("events")
+
 dynamodb = boto3.resource("dynamodb")
 
 events_table = dynamodb.Table(os.environ["EVENTS_TABLE"])
 
-registrations_table = dynamodb.Table(
-    os.environ["REGISTRATIONS_TABLE"]
-)
+registrations_table = dynamodb.Table(os.environ["REGISTRATIONS_TABLE"])
 
 
 def lambda_handler(event, context):
     try:
-
         event_id = event["pathParameters"]["eventId"]
 
         attendee_id = "demo-attendee"
 
-        # Check if event exists
-        event_response = events_table.get_item(
-            Key={
-                "eventId": event_id
-            }
-        )
+        # Verify event exists
+        event_response = events_table.get_item(Key={"eventId": event_id})
 
         event_item = event_response.get("Item")
 
         if not event_item:
             return {
                 "statusCode": 404,
-                "body": json.dumps({
-                    "message": "Event not found"
-                }),
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "Event not found"}),
             }
 
-        # Check for duplicate registration
+        # Prevent duplicate registration
         existing_registrations = registrations_table.query(
             IndexName="AttendeeRegistrations",
-            KeyConditionExpression=Key("attendeeId").eq(attendee_id)
+            KeyConditionExpression=Key("attendeeId").eq(attendee_id),
         )
 
         for registration in existing_registrations.get("Items", []):
-
             if registration["eventId"] == event_id:
-
                 return {
                     "statusCode": 409,
-                    "headers": {
-                        "Content-Type": "application/json"
-                    },
-                    "body": json.dumps({
-                        "message": "Already registered"
-                    }),
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({"message": "Already registered"}),
                 }
 
         # Create registration
@@ -70,29 +58,40 @@ def lambda_handler(event, context):
             "registeredAt": datetime.utcnow().isoformat(),
         }
 
-        registrations_table.put_item(
-            Item=registration
+        registrations_table.put_item(Item=registration)
+
+        # Publish EventBridge event
+        event_response = events_client.put_events(
+            Entries=[
+                {
+                    "Source": "event-ticketing.registration",
+                    "DetailType": "RegistrationCreated",
+                    "Detail": json.dumps(
+                        {
+                            "registrationId": registration_id,
+                            "eventId": event_id,
+                            "attendeeId": attendee_id,
+                            "registeredAt": registration["registeredAt"],
+                        }
+                    ),
+                }
+            ]
         )
+
+        if event_response["FailedEntryCount"] > 0:
+            raise Exception("Failed to publish RegistrationCreated event")
 
         return {
             "statusCode": 201,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "body": json.dumps({
-                "registrationId": registration_id,
-                "status": "REGISTERED"
-            }),
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(
+                {"registrationId": registration_id, "status": "REGISTERED"}
+            ),
         }
 
     except Exception as e:
-
         return {
             "statusCode": 500,
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "body": json.dumps({
-                "message": str(e)
-            }),
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"message": str(e)}),
         }

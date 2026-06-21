@@ -35,7 +35,7 @@ def lambda_handler(event, context):
 
         item = {
             "eventId": event_id,
-            "organizerId": "demo-organizer",
+            "organizerId": event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"],
             "title": body["title"],
             "description": body["description"],
             "category": body["category"],

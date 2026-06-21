@@ -91,6 +91,10 @@ module "api_gateway" {
 
   validate_ticket_lambda_name = module.validate_ticket_lambda.lambda_name
 
+  user_pool_id = module.cognito.user_pool_id
+
+  user_pool_client_id = module.cognito.user_pool_client_id
+
 }
 
 data "archive_file" "list_events_zip" {

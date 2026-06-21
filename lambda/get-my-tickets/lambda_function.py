@@ -19,7 +19,7 @@ def decimal_to_float(obj):
 
 def lambda_handler(event, context):
     try:
-        attendee_id = "demo-attendee"
+        attendee_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
 
         response = tickets_table.query(
             IndexName="AttendeeTickets",

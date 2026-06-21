@@ -18,7 +18,7 @@ def decimal_default(obj):
 
 def lambda_handler(event, context):
     try:
-        attendee_id = "demo-attendee"
+        attendee_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
 
         response = registrations_table.query(
             IndexName="AttendeeRegistrations",

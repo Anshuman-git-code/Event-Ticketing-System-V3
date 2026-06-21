@@ -33,6 +33,10 @@ resource "aws_apigatewayv2_route" "create_event" {
 
   route_key = "POST /events"
 
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
   target = "integrations/${aws_apigatewayv2_integration.create_event.id}"
 }
 
@@ -130,6 +134,10 @@ resource "aws_apigatewayv2_route" "get_my_events" {
 
   route_key = "GET /events/my"
 
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
   target = "integrations/${aws_apigatewayv2_integration.get_my_events.id}"
 }
 
@@ -162,6 +170,10 @@ resource "aws_apigatewayv2_route" "register_event" {
   api_id = aws_apigatewayv2_api.this.id
 
   route_key = "POST /events/{eventId}/register"
+
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
 
   target = "integrations/${aws_apigatewayv2_integration.register_event.id}"
 }
@@ -196,6 +208,10 @@ resource "aws_apigatewayv2_route" "get_my_registrations" {
 
   route_key = "GET /registrations/my"
 
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
   target = "integrations/${aws_apigatewayv2_integration.get_my_registrations.id}"
 }
 
@@ -228,6 +244,10 @@ resource "aws_apigatewayv2_route" "get_my_tickets" {
   api_id = aws_apigatewayv2_api.this.id
 
   route_key = "GET /tickets/my"
+
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
 
   target = "integrations/${aws_apigatewayv2_integration.get_my_tickets.id}"
 }
@@ -295,6 +315,10 @@ resource "aws_apigatewayv2_route" "validate_ticket" {
 
   route_key = "POST /tickets/{ticketId}/validate"
 
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
   target = "integrations/${aws_apigatewayv2_integration.validate_ticket.id}"
 }
 
@@ -309,4 +333,26 @@ resource "aws_lambda_permission" "allow_api_gateway_validate_ticket" {
   principal = "apigateway.amazonaws.com"
 
   source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
+}
+
+resource "aws_apigatewayv2_authorizer" "cognito" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  name = "cognito-authorizer"
+
+  authorizer_type = "JWT"
+
+  identity_sources = [
+    "$request.header.Authorization"
+  ]
+
+  jwt_configuration {
+
+    audience = [
+      var.user_pool_client_id
+    ]
+
+    issuer = "https://cognito-idp.ap-south-1.amazonaws.com/${var.user_pool_id}"
+  }
 }

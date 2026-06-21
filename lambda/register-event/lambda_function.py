@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     try:
         event_id = event["pathParameters"]["eventId"]
 
-        attendee_id = "demo-attendee"
+        attendee_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
 
         # Verify event exists
         event_response = events_table.get_item(Key={"eventId": event_id})

@@ -73,3 +73,11 @@ variable "validate_ticket_lambda_invoke_arn" {
 variable "validate_ticket_lambda_name" {
   type = string
 }
+
+variable "user_pool_id" {
+  type = string
+}
+
+variable "user_pool_client_id" {
+  type = string
+}

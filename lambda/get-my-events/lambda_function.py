@@ -20,7 +20,7 @@ def decimal_default(obj):
 
 def lambda_handler(event, context):
     try:
-        organizer_id = "demo-organizer"
+        organizer_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
 
         response = table.query(
             IndexName="OrganizerEvents",

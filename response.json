@@ -1,1 +1,1 @@
-{"statusCode": 200, "headers": {"Content-Type": "application/json"}, "body": "{\"message\": \"Create Event Lambda Working\"}"}
+{"statusCode": 200, "body": "{\"message\": \"Ticket Generator Working\"}"}

@@ -84,3 +84,40 @@ resource "aws_dynamodb_table" "registrations" {
     projection_type = "ALL"
   }
 }
+
+resource "aws_dynamodb_table" "tickets" {
+
+  name         = "${var.project_name}-tickets"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "ticketId"
+
+  attribute {
+    name = "ticketId"
+    type = "S"
+  }
+
+  attribute {
+    name = "registrationId"
+    type = "S"
+  }
+
+  attribute {
+    name = "attendeeId"
+    type = "S"
+  }
+
+  global_secondary_index {
+    name            = "RegistrationTicket"
+    hash_key        = "registrationId"
+    projection_type = "ALL"
+  }
+
+  global_secondary_index {
+    name            = "AttendeeTickets"
+    hash_key        = "attendeeId"
+    projection_type = "ALL"
+  }
+}
+
+

@@ -16,6 +16,7 @@ module "iam" {
   project_name            = "event-ticketing-v3"
   events_table_arn        = module.dynamodb.events_table_arn
   registrations_table_arn = module.dynamodb.registrations_table_arn
+  tickets_table_arn       = module.dynamodb.tickets_table_arn
 }
 
 data "archive_file" "create_event_zip" {
@@ -234,3 +235,41 @@ module "get_my_registrations_lambda" {
   }
 }
 
+data "archive_file" "generate_ticket_zip" {
+
+  type = "zip"
+
+  source_dir = "../../../lambda/generate-ticket"
+
+  output_path = "../../../build/generate-ticket.zip"
+}
+
+module "generate_ticket_lambda" {
+
+  source = "../../modules/lambda"
+
+  function_name = "generate-ticket"
+
+  runtime = "python3.12"
+
+  handler = "lambda_function.lambda_handler"
+
+  role_arn = module.iam.event_lambda_role_arn
+
+  filename = data.archive_file.generate_ticket_zip.output_path
+
+  source_code_hash = data.archive_file.generate_ticket_zip.output_base64sha256
+
+  environment_variables = {
+    TICKETS_TABLE = module.dynamodb.tickets_table_name
+  }
+}
+
+module "eventbridge" {
+
+  source = "../../modules/eventbridge"
+
+  generate_ticket_lambda_arn = module.generate_ticket_lambda.lambda_arn
+
+  generate_ticket_lambda_name = module.generate_ticket_lambda.lambda_name
+}

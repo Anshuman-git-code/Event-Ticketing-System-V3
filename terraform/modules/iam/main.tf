@@ -45,7 +45,10 @@ resource "aws_iam_policy" "event_lambda_policy" {
           "${var.events_table_arn}/index/*",
 
           var.registrations_table_arn,
-          "${var.registrations_table_arn}/index/*"
+          "${var.registrations_table_arn}/index/*",
+
+          var.tickets_table_arn,
+          "${var.tickets_table_arn}/index/*",
         ]
       },
 

@@ -9,3 +9,7 @@ variable "events_table_arn" {
 variable "registrations_table_arn" {
   type = string
 }
+
+variable "tickets_table_arn" {
+  type = string
+}

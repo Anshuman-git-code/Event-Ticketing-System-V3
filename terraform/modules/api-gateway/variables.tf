@@ -57,3 +57,11 @@ variable "get_my_tickets_lambda_invoke_arn" {
 variable "get_my_tickets_lambda_name" {
   type = string
 }
+
+variable "get_ticket_lambda_invoke_arn" {
+  type = string
+}
+
+variable "get_ticket_lambda_name" {
+  type = string
+}

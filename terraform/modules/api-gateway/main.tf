@@ -393,3 +393,40 @@ resource "aws_lambda_permission" "allow_api_gateway_event_analytics" {
 
   source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
 }
+
+resource "aws_apigatewayv2_integration" "download_ticket" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  integration_type = "AWS_PROXY"
+
+  integration_uri = var.download_ticket_lambda_invoke_arn
+
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "download_ticket" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  route_key = "GET /tickets/{ticketId}/download"
+
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
+  target = "integrations/${aws_apigatewayv2_integration.download_ticket.id}"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_download_ticket" {
+
+  statement_id = "AllowDownloadTicketExecution"
+
+  action = "lambda:InvokeFunction"
+
+  function_name = var.download_ticket_lambda_name
+
+  principal = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
+}

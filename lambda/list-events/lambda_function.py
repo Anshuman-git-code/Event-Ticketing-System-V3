@@ -6,7 +6,9 @@ import boto3
 from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource("dynamodb")
+
 TABLE_NAME = os.environ["EVENTS_TABLE"]
+
 table = dynamodb.Table(TABLE_NAME)
 
 
@@ -18,10 +20,31 @@ def decimal_default(obj):
 
 def lambda_handler(event, context):
     try:
-        response = table.query(
-            IndexName="UpcomingEvents",
-            KeyConditionExpression=Key("status").eq("PUBLISHED"),
-        )
+        query_params = event.get("queryStringParameters") or {}
+
+        category = query_params.get("category")
+        status = query_params.get("status")
+
+        # Filter by category
+        if category:
+            response = table.query(
+                IndexName="CategoryIndex",
+                KeyConditionExpression=Key("category").eq(category),
+            )
+
+        # Filter by status
+        elif status:
+            response = table.query(
+                IndexName="UpcomingEvents",
+                KeyConditionExpression=Key("status").eq(status),
+            )
+
+        # Default: all published events
+        else:
+            response = table.query(
+                IndexName="UpcomingEvents",
+                KeyConditionExpression=Key("status").eq("PUBLISHED"),
+            )
 
         events = response.get("Items", [])
 
@@ -32,4 +55,8 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        return {"statusCode": 500, "body": json.dumps({"message": str(e)})}
+        return {
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"message": str(e)}),
+        }

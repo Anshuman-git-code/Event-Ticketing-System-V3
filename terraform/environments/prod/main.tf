@@ -103,6 +103,10 @@ module "api_gateway" {
 
   event_analytics_lambda_name = module.event_analytics_lambda.lambda_name
 
+  download_ticket_lambda_invoke_arn = module.download_ticket_lambda.invoke_arn
+
+  download_ticket_lambda_name = module.download_ticket_lambda.function_name
+
 }
 
 data "archive_file" "list_events_zip" {
@@ -434,4 +438,35 @@ module "ses" {
   source = "../../modules/ses"
 
   sender_email = "anshumanmohapatra.m@gmail.com"
+}
+
+data "archive_file" "download_ticket_zip" {
+
+  type = "zip"
+
+  source_dir = "../../../lambda/download-ticket"
+
+  output_path = "../../../build/download-ticket.zip"
+}
+
+module "download_ticket_lambda" {
+
+  source = "../../modules/lambda"
+
+  function_name = "download-ticket"
+
+  runtime = "python3.12"
+
+  handler = "lambda_function.lambda_handler"
+
+  role_arn = module.iam.event_lambda_role_arn
+
+  filename = data.archive_file.download_ticket_zip.output_path
+
+  source_code_hash = data.archive_file.download_ticket_zip.output_base64sha256
+
+  environment_variables = {
+    TICKETS_TABLE  = module.dynamodb.tickets_table_name
+    TICKETS_BUCKET = module.s3.bucket_name
+  }
 }

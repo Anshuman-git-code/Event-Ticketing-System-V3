@@ -50,7 +50,8 @@ resource "aws_iam_policy" "event_lambda_policy" {
         Effect = "Allow"
 
           Action = [
-            "s3:PutObject"
+            "s3:PutObject",
+            "s3:GetObject"
           ]
 
         Resource = [

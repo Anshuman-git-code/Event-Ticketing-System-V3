@@ -89,3 +89,11 @@ variable "event_analytics_lambda_invoke_arn" {
 variable "event_analytics_lambda_name" {
   type = string
 }
+
+variable "download_ticket_lambda_invoke_arn" {
+  type = string
+}
+
+variable "download_ticket_lambda_name" {
+  type = string
+}

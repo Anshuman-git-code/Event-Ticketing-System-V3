@@ -81,3 +81,11 @@ variable "user_pool_id" {
 variable "user_pool_client_id" {
   type = string
 }
+
+variable "event_analytics_lambda_invoke_arn" {
+  type = string
+}
+
+variable "event_analytics_lambda_name" {
+  type = string
+}

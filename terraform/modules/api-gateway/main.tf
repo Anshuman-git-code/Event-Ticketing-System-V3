@@ -356,3 +356,40 @@ resource "aws_apigatewayv2_authorizer" "cognito" {
     issuer = "https://cognito-idp.ap-south-1.amazonaws.com/${var.user_pool_id}"
   }
 }
+
+resource "aws_apigatewayv2_integration" "event_analytics" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  integration_type = "AWS_PROXY"
+
+  integration_uri = var.event_analytics_lambda_invoke_arn
+
+  payload_format_version = "2.0"
+}
+
+resource "aws_apigatewayv2_route" "event_analytics" {
+
+  api_id = aws_apigatewayv2_api.this.id
+
+  route_key = "GET /events/{eventId}/analytics"
+
+  authorization_type = "JWT"
+
+  authorizer_id = aws_apigatewayv2_authorizer.cognito.id
+
+  target = "integrations/${aws_apigatewayv2_integration.event_analytics.id}"
+}
+
+resource "aws_lambda_permission" "allow_api_gateway_event_analytics" {
+
+  statement_id = "AllowEventAnalyticsExecution"
+
+  action = "lambda:InvokeFunction"
+
+  function_name = var.event_analytics_lambda_name
+
+  principal = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_apigatewayv2_api.this.execution_arn}/*"
+}

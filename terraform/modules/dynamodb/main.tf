@@ -107,6 +107,11 @@ resource "aws_dynamodb_table" "tickets" {
     type = "S"
   }
 
+  attribute {
+  name = "eventId"
+  type = "S"
+  }
+
   global_secondary_index {
     name            = "RegistrationTicket"
     hash_key        = "registrationId"
@@ -117,6 +122,12 @@ resource "aws_dynamodb_table" "tickets" {
     name            = "AttendeeTickets"
     hash_key        = "attendeeId"
     projection_type = "ALL"
+  }
+
+  global_secondary_index {
+  name            = "EventTickets"
+  hash_key        = "eventId"
+  projection_type = "ALL"
   }
 }
 

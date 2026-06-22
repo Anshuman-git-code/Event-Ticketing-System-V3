@@ -283,6 +283,7 @@ module "generate_ticket_lambda" {
   environment_variables = {
     TICKETS_TABLE  = module.dynamodb.tickets_table_name
     TICKETS_BUCKET = module.s3.bucket_name
+    SENDER_EMAIL   = module.ses.sender_email
   }
 }
 
@@ -390,4 +391,10 @@ module "s3" {
   source = "../../modules/s3"
 
   project_name = "event-ticketing-v3"
+}
+
+module "ses" {
+  source = "../../modules/ses"
+
+  sender_email = "anshumanmohapatra.m@gmail.com"
 }

@@ -9,10 +9,12 @@ from datetime import datetime
 
 dynamodb = boto3.resource("dynamodb")
 s3 = boto3.client("s3")
+ses = boto3.client("ses")
 
 tickets_table = dynamodb.Table(os.environ["TICKETS_TABLE"])
 
 bucket_name = os.environ["TICKETS_BUCKET"]
+sender_email = os.environ["SENDER_EMAIL"]
 
 
 def lambda_handler(event, context):
@@ -47,7 +49,7 @@ def lambda_handler(event, context):
             s3.put_object(
                 Bucket=bucket_name,
                 Key=object_key,
-                Body=f,
+                Body=f.read(),
                 ContentType="image/svg+xml",
             )
 
@@ -62,6 +64,39 @@ def lambda_handler(event, context):
         }
 
         tickets_table.put_item(Item=ticket)
+
+        # SES EMAIL
+
+        recipient_email = sender_email
+
+        ses.send_email(
+            Source=sender_email,
+            Destination={"ToAddresses": [recipient_email]},
+            Message={
+                "Subject": {"Data": f"Your Event Ticket - {ticket_id}"},
+                "Body": {
+                    "Text": {
+                        "Data": f"""
+Ticket Generated Successfully
+
+Ticket ID: {ticket_id}
+
+Event ID: {event_id}
+
+Registration ID: {registration_id}
+
+QR Ticket File:
+
+s3://{bucket_name}/{object_key}
+
+Thank you for registering.
+"""
+                    }
+                },
+            },
+        )
+
+        print(f"Email sent for ticket: {ticket_id}")
 
         print(f"SVG QR ticket generated: {ticket_id}")
 

@@ -60,6 +60,14 @@ resource "aws_iam_policy" "event_lambda_policy" {
       {
         Effect = "Allow"
         Action = [
+          "ses:SendEmail",
+          "ses:SendRawEmail"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"

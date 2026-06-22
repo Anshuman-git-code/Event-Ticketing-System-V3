@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 const API =
     "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
@@ -51,7 +52,11 @@ export default function Events() {
                         <b>Price:</b> ₹{event.ticketPrice}
                     </p>
 
-                    <button>View Details</button>
+                    <Link to={`/events/${event.eventId}`}>
+                        <button>
+                            View Details
+                        </button>
+                    </Link>
                 </div>
             ))}
         </div>

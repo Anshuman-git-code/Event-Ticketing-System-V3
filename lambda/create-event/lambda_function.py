@@ -12,6 +12,15 @@ table = dynamodb.Table(TABLE_NAME)
 
 def lambda_handler(event, context):
     try:
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        groups = claims.get("cognito:groups", "")
+        if "Organizers" not in groups:
+            return {
+                "statusCode": 403,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "Only organizers can create events"}),
+            }
+
         body = json.loads(event.get("body", "{}"))
 
         required_fields = [

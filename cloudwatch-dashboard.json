@@ -1,0 +1,130 @@
+{
+    "widgets": [
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "API Requests",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/ApiGateway",
+                        "Count",
+                        "ApiId",
+                        "x62e2mv593"
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 0,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "API Errors",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/ApiGateway",
+                        "4xx",
+                        "ApiId",
+                        "x62e2mv593"
+                    ],
+                    [
+                        ".",
+                        "5xx",
+                        ".",
+                        "."
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "Lambda Invocations",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/Lambda",
+                        "Invocations",
+                        "FunctionName",
+                        "generate-ticket"
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 6,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "Lambda Errors",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/Lambda",
+                        "Errors",
+                        "FunctionName",
+                        "generate-ticket"
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "metric",
+            "x": 0,
+            "y": 12,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "DynamoDB Reads",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/DynamoDB",
+                        "ConsumedReadCapacityUnits",
+                        "TableName",
+                        "event-ticketing-v3-events"
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "metric",
+            "x": 12,
+            "y": 12,
+            "width": 12,
+            "height": 6,
+            "properties": {
+                "title": "DynamoDB Writes",
+                "view": "timeSeries",
+                "region": "ap-south-1",
+                "metrics": [
+                    [
+                        "AWS/DynamoDB",
+                        "ConsumedWriteCapacityUnits",
+                        "TableName",
+                        "event-ticketing-v3-events"
+                    ]
+                ]
+            }
+        }
+    ]
+}

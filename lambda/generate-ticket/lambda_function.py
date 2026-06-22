@@ -53,6 +53,13 @@ def lambda_handler(event, context):
                 ContentType="image/svg+xml",
             )
 
+        # Generate presigned URL valid for 7 days
+        download_url = s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": bucket_name, "Key": object_key},
+            ExpiresIn=604800,
+        )
+
         ticket = {
             "ticketId": ticket_id,
             "registrationId": registration_id,
@@ -65,39 +72,54 @@ def lambda_handler(event, context):
 
         tickets_table.put_item(Item=ticket)
 
-        # SES EMAIL
-
-        recipient_email = sender_email
-
         ses.send_email(
             Source=sender_email,
-            Destination={"ToAddresses": [recipient_email]},
+            Destination={"ToAddresses": [sender_email]},
             Message={
                 "Subject": {"Data": f"Your Event Ticket - {ticket_id}"},
                 "Body": {
-                    "Text": {
+                    "Html": {
                         "Data": f"""
-Ticket Generated Successfully
+<h2>Your Ticket Is Ready!</h2>
+<p><b>Ticket ID:</b> {ticket_id}</p>
+<p><b>Event ID:</b> {event_id}</p>
+<p><b>Registration ID:</b> {registration_id}</p>
+<p>
+  <a href="{download_url}" style="
+    background-color:#007bff;
+    color:white;
+    padding:12px 24px;
+    text-decoration:none;
+    border-radius:6px;
+    display:inline-block;
+    margin-top:12px;
+  ">
+    Download Your QR Ticket
+  </a>
+</p>
+<p style="color:#666;font-size:12px;">This link expires in 7 days.</p>
+<p>Thank you for registering!</p>
+"""
+                    },
+                    "Text": {
+                        "Data": f"""Your ticket is ready!
 
 Ticket ID: {ticket_id}
-
 Event ID: {event_id}
-
 Registration ID: {registration_id}
 
-QR Ticket File:
+Download your QR ticket here:
+{download_url}
 
-s3://{bucket_name}/{object_key}
-
-Thank you for registering.
+This link expires in 7 days.
+Thank you for registering!
 """
-                    }
+                    },
                 },
             },
         )
 
         print(f"Email sent for ticket: {ticket_id}")
-
         print(f"SVG QR ticket generated: {ticket_id}")
 
         return {"statusCode": 200, "body": json.dumps(ticket)}

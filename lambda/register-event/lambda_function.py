@@ -17,9 +17,18 @@ registrations_table = dynamodb.Table(os.environ["REGISTRATIONS_TABLE"])
 
 def lambda_handler(event, context):
     try:
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        groups = claims.get("cognito:groups", "")
+        if "Attendees" not in groups:
+            return {
+                "statusCode": 403,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "Only attendees can register for events"}),
+            }
+
         event_id = event["pathParameters"]["eventId"]
 
-        attendee_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
+        attendee_id = claims["sub"]
 
         # Verify event exists
         event_response = events_table.get_item(Key={"eventId": event_id})

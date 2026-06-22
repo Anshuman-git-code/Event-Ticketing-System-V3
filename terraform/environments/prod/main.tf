@@ -434,6 +434,12 @@ module "s3" {
   project_name = "event-ticketing-v3"
 }
 
+module "cloudfront" {
+  source = "../../modules/cloudfront"
+
+  project_name = "event-ticketing-v3"
+}
+
 module "ses" {
   source = "../../modules/ses"
 

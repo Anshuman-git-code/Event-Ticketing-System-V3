@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const API =
     "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
@@ -35,7 +35,41 @@ export default function Dashboard() {
 
     return (
         <div style={{ padding: "30px" }}>
-            <h1>Organizer Dashboard</h1>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <h1>Organizer Dashboard</h1>
+                <div>
+                    <button
+                        onClick={() => navigate("/dashboard/create")}
+                        style={{
+                            padding: "10px 20px",
+                            backgroundColor: "#007bff",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            marginRight: "12px",
+                        }}
+                    >
+                        + Create Event
+                    </button>
+                    <Link to="/validate-ticket">
+                        <button
+                            style={{
+                                padding: "10px 20px",
+                                backgroundColor: "#28a745",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "6px",
+                                cursor: "pointer",
+                            }}
+                        >
+                            Validate Ticket
+                        </button>
+                    </Link>
+                </div>
+            </div>
+
+            {events.length === 0 && <p>No events yet. Create your first event!</p>}
 
             {events.map((event) => (
                 <div
@@ -44,6 +78,7 @@ export default function Dashboard() {
                         border: "1px solid #ddd",
                         padding: "15px",
                         marginBottom: "15px",
+                        borderRadius: "8px",
                     }}
                 >
                     <h3>{event.title}</h3>
@@ -56,6 +91,10 @@ export default function Dashboard() {
 
                     <p>
                         <b>Date:</b> {event.eventDate}
+                    </p>
+
+                    <p>
+                        <b>Category:</b> {event.category}
                     </p>
 
                     <button

@@ -7,6 +7,8 @@ import MyTickets from "./pages/MyTickets";
 import MyRegistrations from "./pages/MyRegistrations";
 import Dashboard from "./pages/Dashboard";
 import Analytics from "./pages/Analytics";
+import CreateEvent from "./pages/CreateEvent";
+import ValidateTicket from "./pages/ValidateTicket";
 
 function App() {
   return (
@@ -18,10 +20,9 @@ function App() {
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/my-registrations" element={<MyRegistrations />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route
-          path="/dashboard/event/:eventId"
-          element={<Analytics />}
-        />
+        <Route path="/dashboard/create" element={<CreateEvent />} />
+        <Route path="/dashboard/event/:eventId" element={<Analytics />} />
+        <Route path="/validate-ticket" element={<ValidateTicket />} />
       </Routes>
     </BrowserRouter>
   );

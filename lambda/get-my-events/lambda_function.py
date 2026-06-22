@@ -20,7 +20,16 @@ def decimal_default(obj):
 
 def lambda_handler(event, context):
     try:
-        organizer_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        groups = claims.get("cognito:groups", "")
+        if "Organizers" not in groups:
+            return {
+                "statusCode": 403,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "Only organizers can access this endpoint"}),
+            }
+
+        organizer_id = claims["sub"]
 
         response = table.query(
             IndexName="OrganizerEvents",

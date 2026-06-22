@@ -18,7 +18,16 @@ def decimal_default(obj):
 
 def lambda_handler(event, context):
     try:
-        attendee_id = event["requestContext"]["authorizer"]["jwt"]["claims"]["sub"]
+        claims = event["requestContext"]["authorizer"]["jwt"]["claims"]
+        groups = claims.get("cognito:groups", "")
+        if "Attendees" not in groups:
+            return {
+                "statusCode": 403,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"message": "Only attendees can access registrations"}),
+            }
+
+        attendee_id = claims["sub"]
 
         response = registrations_table.query(
             IndexName="AttendeeRegistrations",

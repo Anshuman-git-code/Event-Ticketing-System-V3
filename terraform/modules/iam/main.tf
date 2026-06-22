@@ -53,6 +53,7 @@ resource "aws_iam_policy" "event_lambda_policy" {
             "s3:PutObject",
             "s3:GetObject"
           ]
+          
 
         Resource = [
           "${var.tickets_bucket_arn}/*"

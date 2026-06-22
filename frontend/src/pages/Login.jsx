@@ -1,3 +1,11 @@
 export default function Login() {
-    return <h1>Login Page</h1>;
+    return (
+        <div style={{ padding: "30px" }}>
+            <h1>Login</h1>
+
+            <p>
+                Cognito login screen will be added next.
+            </p>
+        </div>
+    );
 }

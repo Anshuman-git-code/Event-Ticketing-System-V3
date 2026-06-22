@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const API =
     "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
 
 export default function EventDetails() {
     const { eventId } = useParams();
+
+    const navigate = useNavigate();
 
     const [event, setEvent] = useState(null);
 
@@ -48,7 +51,7 @@ export default function EventDetails() {
                 <b>Price:</b> ₹{event.ticketPrice}
             </p>
 
-            <button>
+            <button onClick={() => navigate("/login")}>
                 Register
             </button>
         </div>

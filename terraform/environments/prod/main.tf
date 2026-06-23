@@ -476,3 +476,10 @@ module "download_ticket_lambda" {
     TICKETS_BUCKET = module.s3.bucket_name
   }
 }
+
+module "cloudwatch_dashboard" {
+
+  source = "../../modules/cloudwatch-dashboard"
+
+  dashboard_name = "EventTicketingV3"
+}

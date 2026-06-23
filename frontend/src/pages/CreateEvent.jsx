@@ -1,184 +1,90 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 const API = "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
 
 export default function CreateEvent() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({
-        title: "",
-        description: "",
-        category: "",
-        location: "",
-        eventDate: "",
-        capacity: "",
-        ticketPrice: "",
-    });
+    const [form, setForm] = useState({ title: "", description: "", category: "", location: "", eventDate: "", capacity: "", ticketPrice: "" });
 
-    function handleChange(e) {
-        setForm({ ...form, [e.target.name]: e.target.value });
-    }
+    function handleChange(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
 
     async function handleSubmit(e) {
         e.preventDefault();
         const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
+        if (!token) { navigate("/login"); return; }
         setLoading(true);
         try {
-            const response = await axios.post(
-                `${API}/events`,
-                {
-                    ...form,
-                    capacity: Number(form.capacity),
-                    ticketPrice: Number(form.ticketPrice),
-                },
-                { headers: { Authorization: token } }
-            );
-            alert(`Event created! ID: ${response.data.eventId}`);
+            const res = await axios.post(`${API}/events`, { ...form, capacity: Number(form.capacity), ticketPrice: Number(form.ticketPrice) }, { headers: { Authorization: token } });
+            alert(`✅ Event created!\nID: ${res.data.eventId}`);
             navigate("/dashboard");
-        } catch (error) {
-            alert(error.response?.data?.message || "Failed to create event");
+        } catch (e) {
+            alert(e.response?.data?.message || "Failed to create event");
         } finally {
             setLoading(false);
         }
     }
 
-    const inputStyle = {
-        display: "block",
-        width: "100%",
-        padding: "8px",
-        marginBottom: "15px",
-        borderRadius: "6px",
-        border: "1px solid #ccc",
-        fontSize: "14px",
-    };
-
     return (
-        <div style={{ padding: "30px", maxWidth: "600px" }}>
-            <h1>Create New Event</h1>
-            <form onSubmit={handleSubmit}>
-                <label>Title</label>
-                <input
-                    name="title"
-                    value={form.title}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                    placeholder="AWS Summit Bhubaneswar"
-                />
+        <div className="create-event-page">
+            <Navbar />
+            <div className="create-event-content">
+                <div className="create-event-header">
+                    <button className="btn btn-ghost btn-sm" onClick={() => navigate("/dashboard")} style={{ marginBottom: 16 }}>← Back to Dashboard</button>
+                    <h1>Create New Event</h1>
+                    <p>Fill in the details to publish your event</p>
+                </div>
 
-                <label>Description</label>
-                <textarea
-                    name="description"
-                    value={form.description}
-                    onChange={handleChange}
-                    required
-                    rows={4}
-                    style={{ ...inputStyle, resize: "vertical" }}
-                    placeholder="Event description..."
-                />
+                <div className="create-event-card">
+                    <form onSubmit={handleSubmit}>
+                        <div className="form-group" style={{ marginBottom: 24 }}>
+                            <label>Event Title *</label>
+                            <input className="input" name="title" value={form.title} onChange={handleChange} required placeholder="AWS Summit Bhubaneswar 2026" />
+                        </div>
 
-                <label>Category</label>
-                <select
-                    name="category"
-                    value={form.category}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                >
-                    <option value="">Select category</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Music">Music</option>
-                    <option value="Sports">Sports</option>
-                    <option value="Business">Business</option>
-                    <option value="Education">Education</option>
-                    <option value="Art">Art</option>
-                    <option value="Other">Other</option>
-                </select>
+                        <div className="form-group" style={{ marginBottom: 24 }}>
+                            <label>Description *</label>
+                            <textarea className="input" name="description" value={form.description} onChange={handleChange} required rows={4} placeholder="Describe your event..." />
+                        </div>
 
-                <label>Location</label>
-                <input
-                    name="location"
-                    value={form.location}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                    placeholder="Bhubaneswar, Odisha"
-                />
+                        <div className="form-grid-2">
+                            <div className="form-group">
+                                <label>Category *</label>
+                                <select className="input" name="category" value={form.category} onChange={handleChange} required>
+                                    <option value="">Select category</option>
+                                    {["Technology", "Business", "Music", "Sports", "Education", "Art", "Other"].map(c => <option key={c} value={c}>{c}</option>)}
+                                </select>
+                            </div>
+                            <div className="form-group">
+                                <label>Location *</label>
+                                <input className="input" name="location" value={form.location} onChange={handleChange} required placeholder="Bhubaneswar, Odisha" />
+                            </div>
+                            <div className="form-group">
+                                <label>Event Date *</label>
+                                <input className="input" type="date" name="eventDate" value={form.eventDate} onChange={handleChange} required />
+                            </div>
+                            <div className="form-group">
+                                <label>Capacity *</label>
+                                <input className="input" type="number" name="capacity" value={form.capacity} onChange={handleChange} required min="1" placeholder="500" />
+                            </div>
+                            <div className="form-group">
+                                <label>Ticket Price (₹) *</label>
+                                <input className="input" type="number" name="ticketPrice" value={form.ticketPrice} onChange={handleChange} required min="0" placeholder="499" />
+                            </div>
+                        </div>
 
-                <label>Event Date (YYYY-MM-DD)</label>
-                <input
-                    name="eventDate"
-                    type="date"
-                    value={form.eventDate}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                />
-
-                <label>Capacity</label>
-                <input
-                    name="capacity"
-                    type="number"
-                    min="1"
-                    value={form.capacity}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                    placeholder="500"
-                />
-
-                <label>Ticket Price (₹)</label>
-                <input
-                    name="ticketPrice"
-                    type="number"
-                    min="0"
-                    value={form.ticketPrice}
-                    onChange={handleChange}
-                    required
-                    style={inputStyle}
-                    placeholder="499"
-                />
-
-                <button
-                    type="submit"
-                    disabled={loading}
-                    style={{
-                        padding: "10px 24px",
-                        backgroundColor: "#007bff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: loading ? "not-allowed" : "pointer",
-                        fontSize: "15px",
-                    }}
-                >
-                    {loading ? "Creating..." : "Create Event"}
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => navigate("/dashboard")}
-                    style={{
-                        marginLeft: "12px",
-                        padding: "10px 20px",
-                        backgroundColor: "#6c757d",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "15px",
-                    }}
-                >
-                    Cancel
-                </button>
-            </form>
+                        <div className="form-actions">
+                            <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+                                {loading ? "Creating..." : "🚀 Publish Event"}
+                            </button>
+                            <button type="button" className="btn btn-ghost btn-lg" onClick={() => navigate("/dashboard")}>Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     );
 }

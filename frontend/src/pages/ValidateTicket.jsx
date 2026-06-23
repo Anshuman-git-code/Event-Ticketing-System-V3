@@ -1,6 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Navbar from "../components/Navbar";
 
 const API = "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
 
@@ -13,127 +14,67 @@ export default function ValidateTicket() {
 
     async function validate() {
         const token = localStorage.getItem("token");
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        if (!ticketId.trim()) {
-            setError("Please enter a ticket ID");
-            return;
-        }
-
-        setLoading(true);
-        setError("");
-        setResult(null);
-
+        if (!token) { navigate("/login"); return; }
+        if (!ticketId.trim()) { setError("Please enter a ticket ID"); return; }
+        setLoading(true); setError(""); setResult(null);
         try {
-            const response = await axios.post(
-                `${API}/tickets/${ticketId.trim()}/validate`,
-                {},
-                { headers: { Authorization: token } }
-            );
-            setResult({ success: true, data: response.data });
-        } catch (err) {
-            const message =
-                err.response?.data?.message || "Validation failed";
-            setResult({ success: false, message });
+            const res = await axios.post(`${API}/tickets/${ticketId.trim()}/validate`, {}, { headers: { Authorization: token } });
+            setResult({ success: true, data: res.data });
+        } catch (e) {
+            setResult({ success: false, message: e.response?.data?.message || "Validation failed" });
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div style={{ padding: "30px", maxWidth: "500px" }}>
-            <h1>Validate Ticket</h1>
-            <p style={{ color: "#666" }}>
-                Enter the ticket ID from the QR code to mark it as used.
-            </p>
+        <div className="validate-page">
+            <div className="validate-wrap">
+                <Navbar />
+                <div style={{ paddingTop: 40 }}>
+                    <button className="btn btn-ghost btn-sm" onClick={() => navigate("/dashboard")} style={{ marginBottom: 20 }}>← Back</button>
+                    <h1>Validate Ticket</h1>
+                    <p className="subtitle">Enter the ticket ID from the QR code to mark entry.</p>
 
-            <input
-                value={ticketId}
-                onChange={(e) => setTicketId(e.target.value)}
-                placeholder="tkt_abc12345"
-                style={{
-                    padding: "10px",
-                    width: "100%",
-                    borderRadius: "6px",
-                    border: "1px solid #ccc",
-                    fontSize: "15px",
-                    marginBottom: "12px",
-                }}
-                onKeyDown={(e) => e.key === "Enter" && validate()}
-            />
+                    <div className="validate-card">
+                        <label style={{ display: "block", fontWeight: 600, marginBottom: 10, color: "var(--text-h)" }}>Ticket ID</label>
+                        <input
+                            className="input"
+                            value={ticketId}
+                            onChange={e => setTicketId(e.target.value)}
+                            placeholder="tkt_abc12345"
+                            onKeyDown={e => e.key === "Enter" && validate()}
+                        />
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
+                        {error && <p style={{ color: "#ef4444", marginTop: 10, fontSize: 14 }}>{error}</p>}
 
-            <button
-                onClick={validate}
-                disabled={loading}
-                style={{
-                    padding: "10px 24px",
-                    backgroundColor: "#28a745",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    fontSize: "15px",
-                }}
-            >
-                {loading ? "Validating..." : "Validate Ticket"}
-            </button>
+                        <div className="validate-actions">
+                            <button className="btn btn-primary" onClick={validate} disabled={loading}>
+                                {loading ? "Validating..." : "✅ Validate"}
+                            </button>
+                            <button className="btn btn-ghost" onClick={() => { setTicketId(""); setResult(null); setError(""); }}>
+                                Clear
+                            </button>
+                        </div>
 
-            {result && (
-                <div
-                    style={{
-                        marginTop: "24px",
-                        padding: "20px",
-                        borderRadius: "8px",
-                        backgroundColor: result.success ? "#d4edda" : "#f8d7da",
-                        border: `1px solid ${result.success ? "#c3e6cb" : "#f5c6cb"}`,
-                    }}
-                >
-                    {result.success ? (
-                        <>
-                            <h3 style={{ color: "#155724" }}>✅ Ticket Valid</h3>
-                            <p>
-                                <b>Ticket ID:</b> {result.data.ticketId}
-                            </p>
-                            <p>
-                                <b>Status:</b> {result.data.ticketStatus}
-                            </p>
-                            <p>
-                                <b>Attendee ID:</b> {result.data.attendeeId}
-                            </p>
-                        </>
-                    ) : (
-                        <>
-                            <h3 style={{ color: "#721c24" }}>❌ Validation Failed</h3>
-                            <p>{result.message}</p>
-                        </>
-                    )}
+                        {result && result.success && (
+                            <div className="validate-result-success">
+                                <h3>✅ Ticket Valid — Entry Approved</h3>
+                                <div className="info-row"><span className="lbl">Ticket ID</span><span className="val">{result.data.ticketId}</span></div>
+                                <div className="info-row"><span className="lbl">Status</span><span className="val">{result.data.status}</span></div>
+                                <div className="info-row"><span className="lbl">Validated At</span><span className="val">{result.data.validatedAt}</span></div>
+                            </div>
+                        )}
+
+                        {result && !result.success && (
+                            <div className="validate-result-fail">
+                                <h3>❌ Validation Failed</h3>
+                                <p>{result.message}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
-
-            <br />
-            <button
-                onClick={() => {
-                    setTicketId("");
-                    setResult(null);
-                    setError("");
-                }}
-                style={{
-                    marginTop: "12px",
-                    padding: "8px 16px",
-                    backgroundColor: "#6c757d",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                }}
-            >
-                Clear
-            </button>
+            </div>
         </div>
     );
 }

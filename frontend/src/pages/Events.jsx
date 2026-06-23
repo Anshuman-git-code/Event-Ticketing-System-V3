@@ -1,113 +1,185 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 const API = "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
 
-const CATEGORIES = ["", "Technology", "Music", "Sports", "Business", "Education", "Art", "Other"];
+const CATEGORIES = ["All", "Technology", "Business", "Music", "Sports", "Education", "Art", "Other"];
+
+const CAT_ICONS = { Technology: "💻", Business: "💼", Music: "🎵", Sports: "🏆", Education: "🎓", Art: "🎨", Other: "⚡", All: "⚡" };
+const CAT_CLASS = { Technology: "banner-technology", Business: "banner-business", Music: "banner-music", Sports: "banner-sports", Education: "banner-education", Art: "banner-art", Other: "banner-other" };
 
 export default function Events() {
     const [events, setEvents] = useState([]);
-    const [category, setCategory] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [category, setCategory] = useState("All");
     const [status, setStatus] = useState("");
     const [search, setSearch] = useState("");
+    const [searchParams] = useSearchParams();
+
+    useEffect(() => {
+        const q = searchParams.get("search");
+        if (q) setSearch(q);
+    }, []);
 
     useEffect(() => {
         loadEvents();
     }, [category, status]);
 
     async function loadEvents() {
+        setLoading(true);
         try {
             const params = {};
-            if (category) params.category = category;
+            if (category && category !== "All") params.category = category;
             if (status) params.status = status;
-            const response = await axios.get(`${API}/events`, { params });
-            setEvents(response.data);
-        } catch (error) {
-            console.error(error);
+            const res = await axios.get(`${API}/events`, { params });
+            setEvents(res.data);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoading(false);
         }
     }
 
-    const filtered = events.filter((e) =>
-        search === "" ||
-        e.title?.toLowerCase().includes(search.toLowerCase()) ||
-        e.location?.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = events.filter((e) => {
+        if (!search) return true;
+        const q = search.toLowerCase();
+        return e.title?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q);
+    });
 
     return (
-        <div style={{ padding: "30px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                <h1>Event Ticketing System</h1>
-                <div>
-                    <Link to="/login" style={{ marginRight: "12px" }}>Login</Link>
-                    <Link to="/dashboard" style={{ marginRight: "12px" }}>Dashboard</Link>
-                    <Link to="/my-registrations" style={{ marginRight: "12px" }}>My Registrations</Link>
-                    <Link to="/my-tickets">My Tickets</Link>
+        <div className="page-wrap">
+            <Navbar />
+
+            {/* HERO */}
+            <div className="hero">
+                <div className="hero-inner">
+                    <div>
+                        <div className="hero-label">🎟 Premium Event Platform</div>
+                        <h1>Discover Amazing <span>Events</span></h1>
+                        <p className="hero-sub">Find conferences, meetups, workshops, concerts and networking events near you.</p>
+                        <div className="hero-actions">
+                            <button className="btn btn-primary btn-lg" onClick={() => document.getElementById("events-list").scrollIntoView({ behavior: "smooth" })}>
+                                Browse Events →
+                            </button>
+                            <Link to="/dashboard"><button className="btn btn-ghost btn-lg">Organizer Dashboard</button></Link>
+                        </div>
+                        <div className="hero-trust">
+                            <span className="hero-trust-item">🎟 Easy Booking</span>
+                            <span className="hero-trust-item">⚡ Instant Tickets</span>
+                            <span className="hero-trust-item">🛡 Secure &amp; Reliable</span>
+                        </div>
+                    </div>
+                    <div className="hero-image">
+                        <div className="hero-image-placeholder">🎪</div>
+                    </div>
                 </div>
             </div>
 
-            {/* Search & Filter */}
-            <div style={{ display: "flex", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
-                <input
-                    placeholder="Search by title or location..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", minWidth: "240px" }}
-                />
-                <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-                >
-                    <option value="">All Categories</option>
-                    {CATEGORIES.filter(Boolean).map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                    ))}
-                </select>
-                <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}
-                >
-                    <option value="">All Statuses</option>
-                    <option value="PUBLISHED">Published</option>
-                    <option value="DRAFT">Draft</option>
-                    <option value="CANCELLED">Cancelled</option>
-                </select>
-                {(category || status || search) && (
-                    <button
-                        onClick={() => { setCategory(""); setStatus(""); setSearch(""); }}
-                        style={{ padding: "8px 14px", borderRadius: "6px", border: "1px solid #ccc", cursor: "pointer" }}
-                    >
-                        Clear Filters
-                    </button>
-                )}
+            {/* CATEGORIES */}
+            <div className="category-section">
+                <div className="category-section-inner">
+                    <h2>Browse by Category</h2>
+                    <div className="category-pills">
+                        {CATEGORIES.map((c) => (
+                            <button key={c} className={`cat-pill ${category === c ? "active" : ""}`} onClick={() => setCategory(c)}>
+                                <span className="cat-icon">{CAT_ICONS[c] || "⚡"}</span>
+                                {c}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
 
-            {filtered.length === 0 && <p>No events found.</p>}
-
-            {filtered.map((event) => (
-                <div
-                    key={event.eventId}
-                    style={{
-                        border: "1px solid #ddd",
-                        padding: "20px",
-                        marginBottom: "20px",
-                        borderRadius: "10px",
-                    }}
-                >
-                    <h2>{event.title}</h2>
-                    <p>{event.description}</p>
-                    <p><b>Category:</b> {event.category}</p>
-                    <p><b>Location:</b> {event.location}</p>
-                    <p><b>Date:</b> {event.eventDate}</p>
-                    <p><b>Price:</b> ₹{event.ticketPrice}</p>
-                    <p><b>Status:</b> {event.status}</p>
-                    <Link to={`/events/${event.eventId}`}>
-                        <button>View Details</button>
-                    </Link>
+            {/* METRICS BAR */}
+            <div style={{ maxWidth: 1200, margin: "30px auto", padding: "0 24px" }}>
+                <div className="metrics-bar">
+                    <div className="metric-item">
+                        <span className="metric-icon">🎟</span>
+                        <div><div className="metric-value">100+</div><div className="metric-label">Events Available</div></div>
+                    </div>
+                    <div className="metric-item">
+                        <span className="metric-icon">👥</span>
+                        <div><div className="metric-value">5+</div><div className="metric-label">Categories</div></div>
+                    </div>
+                    <div className="metric-item">
+                        <span className="metric-icon">⚡</span>
+                        <div><div className="metric-value">Instant</div><div className="metric-label">Ticket Delivery</div></div>
+                    </div>
+                    <div className="metric-item">
+                        <span className="metric-icon">☁️</span>
+                        <div><div className="metric-value">AWS</div><div className="metric-label">Cloud Powered</div></div>
+                    </div>
                 </div>
-            ))}
+            </div>
+
+            {/* EVENTS LIST */}
+            <div className="events-section" id="events-list">
+                <div className="events-section-inner">
+                    {/* FILTER BAR */}
+                    <div className="filter-bar">
+                        <div className="filter-search input-icon-wrap">
+                            <span className="input-icon">🔍</span>
+                            <input className="input" placeholder="Search events..." value={search} onChange={(e) => setSearch(e.target.value)} style={{ paddingLeft: 38 }} />
+                        </div>
+                        <select className="input filter-select" value={category === "All" ? "" : category} onChange={(e) => setCategory(e.target.value || "All")}>
+                            <option value="">All Categories</option>
+                            {CATEGORIES.filter(c => c !== "All").map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                        <select className="input filter-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                            <option value="">All Statuses</option>
+                            <option value="PUBLISHED">Published</option>
+                            <option value="DRAFT">Draft</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                        {(search || category !== "All" || status) && (
+                            <button className="btn btn-ghost btn-sm" onClick={() => { setSearch(""); setCategory("All"); setStatus(""); }}>
+                                ↺ Clear
+                            </button>
+                        )}
+                    </div>
+
+                    {loading ? (
+                        <div className="loading-screen"><div className="spinner"></div></div>
+                    ) : filtered.length === 0 ? (
+                        <div className="no-events">
+                            <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
+                            <p>No events found. Try different filters.</p>
+                        </div>
+                    ) : (
+                        <div className="events-grid">
+                            {filtered.map((event) => {
+                                const cat = event.category || "Other";
+                                const bannerClass = CAT_CLASS[cat] || "banner-default";
+                                return (
+                                    <div key={event.eventId} className="event-card">
+                                        <div className={`event-card-banner ${bannerClass}`}>
+                                            <span className="event-card-banner-icon">{CAT_ICONS[cat] || "🎪"}</span>
+                                        </div>
+                                        <div className="event-card-body">
+                                            <div className="event-card-meta-row">
+                                                <span className="badge">{cat}</span>
+                                                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>{event.status}</span>
+                                            </div>
+                                            <div className="event-card-title">{event.title}</div>
+                                            <div className="event-card-info"><span className="icon">📍</span>{event.location}</div>
+                                            <div className="event-card-info"><span className="icon">📅</span>{event.eventDate}</div>
+                                            <div className="event-card-footer">
+                                                <span className="event-price">₹{event.ticketPrice}</span>
+                                                <Link to={`/events/${event.eventId}`}>
+                                                    <button className="btn btn-primary btn-sm">View Details →</button>
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                    <p className="footer-note">⭐ More amazing events coming your way!</p>
+                </div>
+            </div>
         </div>
     );
 }

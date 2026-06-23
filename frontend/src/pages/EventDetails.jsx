@@ -6,6 +6,15 @@ import Navbar from "../components/Navbar";
 const API = "https://x62e2mv593.execute-api.ap-south-1.amazonaws.com/prod";
 const CAT_CLASS = { Technology: "banner-technology", Business: "banner-business", Music: "banner-music", Sports: "banner-sports", Education: "banner-education", Art: "banner-art", Other: "banner-other" };
 const CAT_ICONS = { Technology: "💻", Business: "💼", Music: "🎵", Sports: "🏆", Education: "🎓", Art: "🎨", Other: "⚡" };
+const CAT_IMAGES = {
+    Technology: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80",
+    Business: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=1200&q=80",
+    Music: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=1200&q=80",
+    Sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=1200&q=80",
+    Education: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&q=80",
+    Art: "https://images.unsplash.com/photo-1541367777708-7905fe3296c0?w=1200&q=80",
+    Other: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80",
+};
 
 export default function EventDetails() {
     const { eventId } = useParams();

@@ -10,6 +10,17 @@ const CATEGORIES = ["All", "Technology", "Business", "Music", "Sports", "Educati
 const CAT_ICONS = { Technology: "💻", Business: "💼", Music: "🎵", Sports: "🏆", Education: "🎓", Art: "🎨", Other: "⚡", All: "⚡" };
 const CAT_CLASS = { Technology: "banner-technology", Business: "banner-business", Music: "banner-music", Sports: "banner-sports", Education: "banner-education", Art: "banner-art", Other: "banner-other" };
 
+// Free Unsplash photos — one per category, works for ALL events including future ones
+const CAT_IMAGES = {
+    Technology: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=75",
+    Business: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&q=75",
+    Music: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=600&q=75",
+    Sports: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&q=75",
+    Education: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&q=75",
+    Art: "https://images.unsplash.com/photo-1541367777708-7905fe3296c0?w=600&q=75",
+    Other: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&q=75",
+};
+
 export default function Events() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -71,8 +82,14 @@ export default function Events() {
                             <span className="hero-trust-item">🛡 Secure &amp; Reliable</span>
                         </div>
                     </div>
-                    <div className="hero-image">
-                        <div className="hero-image-placeholder">🎪</div>
+                    <div className="hero-image" style={{ padding: 0, position: "relative" }}>
+                        <img
+                            src="https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?w=800&q=80"
+                            alt="Live event crowd"
+                            style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "22px", filter: "brightness(0.75) saturate(1.2)" }}
+                            onError={(e) => { e.target.style.display = "none"; }}
+                        />
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg,rgba(255,0,85,0.15) 0%,transparent 60%)", borderRadius: "22px", pointerEvents: "none" }} />
                     </div>
                 </div>
             </div>
@@ -154,8 +171,14 @@ export default function Events() {
                                 const bannerClass = CAT_CLASS[cat] || "banner-default";
                                 return (
                                     <div key={event.eventId} className="event-card">
-                                        <div className={`event-card-banner ${bannerClass}`}>
-                                            <span className="event-card-banner-icon">{CAT_ICONS[cat] || "🎪"}</span>
+                                        <div className={`event-card-banner ${bannerClass}`} style={{ position: "relative", overflow: "hidden" }}>
+                                            <img
+                                                src={CAT_IMAGES[cat] || CAT_IMAGES["Other"]}
+                                                alt={cat}
+                                                style={{ width: "100%", height: "100%", objectFit: "cover", position: "absolute", inset: 0, filter: "brightness(0.7) saturate(1.1)" }}
+                                                onError={(e) => { e.target.style.display = "none"; }}
+                                            />
+                                            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 60%)" }} />
                                         </div>
                                         <div className="event-card-body">
                                             <div className="event-card-meta-row">

@@ -21,7 +21,7 @@ aws cloudfront create-invalidation \
   --distribution-id "$DISTRIBUTION_ID" \
   --paths "/*" \
   --region us-east-1
-######
+
 echo ""
 echo "✅ Deployment complete!"
 echo "   Frontend URL: $CLOUDFRONT_URL"
